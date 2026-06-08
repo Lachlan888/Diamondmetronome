@@ -1,73 +1,60 @@
-# React + TypeScript + Vite
+# Diamond Metronome
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Diamond Metronome is a local-first Vite + React + TypeScript rhythm practice app.
 
-Currently, two official plugins are available:
+It is an independent browser-based tool for exploring diamond-shaped rhythm patterns, editable cell values, custom paths, a counted beat grid, body-pulse grouping and accent movement.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Current Status
 
-## React Compiler
+Implemented:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Unified 9-cell diamond display with numeric values only.
+- Mini path diamond editor that displays the current active path from initial load.
+- Unique-cell custom path editing.
+- BPM input and slider, 30 through 480.
+- Stomp every 1 through 9 beat grouping.
+- Web Audio lookahead scheduler.
+- Temporary oscillator test sounds for stomp, subdivision and accent.
+- Sound toggles and volume controls.
+- Live BPM, stomp interval, cell value, path and pattern changes during playback.
+- Local one-pattern save/load/reset with `localStorage`.
+- Diamond pair library up to 15, inverse loading and true random diamond generation.
+- Cycle length and even grouping panel.
+- Development debug panel.
 
-## Expanding the ESLint configuration
+Not yet implemented:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- WAV/body-percussion sample loading.
+- Cycle Finder implementation.
+- Multiple saved patterns.
+- Import/export.
+- Deployment.
+- Backend or cloud features.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Development
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```sh
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Build check:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```sh
+npm run build
 ```
+
+Lint check:
+
+```sh
+npm run lint
+```
+
+## Project Docs
+
+Start here:
+
+- [docs/00_PROJECT_INDEX.md](docs/00_PROJECT_INDEX.md)
+- [docs/NEXT_SESSION_HANDOFF.md](docs/NEXT_SESSION_HANDOFF.md)
+
+Diamond Metronome remains local-first. Do not add Next.js, Vercel configuration, Supabase, auth, a database, API routes, server actions or backend services unless explicitly requested.
