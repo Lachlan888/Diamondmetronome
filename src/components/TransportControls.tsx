@@ -2,16 +2,16 @@ type TransportControlsProps = {
   isPlaying: boolean
   pathIsValid: boolean
   onPlay: () => void
+  onPause: () => void
   onStop: () => void
-  onReset: () => void
 }
 
 export function TransportControls({
   isPlaying,
   pathIsValid,
   onPlay,
+  onPause,
   onStop,
-  onReset,
 }: TransportControlsProps) {
   return (
     <section className="control-group" aria-label="Transport">
@@ -29,16 +29,22 @@ export function TransportControls({
         </button>
         <button
           type="button"
+          className="transport-button pause-button"
+          onClick={onPause}
+          disabled={!isPlaying}
+          aria-label="Pause"
+          title="Pause"
+        >
+          <span aria-hidden="true">Ⅱ</span>
+        </button>
+        <button
+          type="button"
           className="transport-button stop-button"
           onClick={onStop}
-          disabled={!isPlaying}
-          aria-label="Stop"
+          aria-label="Stop and return to start"
           title="Stop"
         >
           <span aria-hidden="true">■</span>
-        </button>
-        <button type="button" className="reset-button" onClick={onReset} aria-label="Reset">
-          Reset
         </button>
       </div>
     </section>

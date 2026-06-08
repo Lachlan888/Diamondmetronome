@@ -48,6 +48,10 @@ export function DebugPanel({ tickEvents, activeCellValue, isPlaying }: DebugPane
           <dd>{yesNo(tickEvents.accent)}</dd>
         </div>
         <div>
+          <dt>cycle accent event</dt>
+          <dd>{yesNo(tickEvents.cycleAccent)}</dd>
+        </div>
+        <div>
           <dt>is playing</dt>
           <dd>{yesNo(isPlaying)}</dd>
         </div>

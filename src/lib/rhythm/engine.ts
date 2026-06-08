@@ -30,12 +30,14 @@ export function getTickEvents(
 ): TickEvents {
   const hasActivePath = pattern.path.length > 0 && state.activeCellId !== null
   const accent = hasActivePath && state.ticksInsideCurrentCell === 0
+  const cycleAccent = accent && state.currentPathIndex === 0
 
   return {
     globalTick: state.globalTick,
     stomp: state.globalTick % settings.stompInterval === 0,
-    subdivision: !accent,
+    subdivision: !accent && !cycleAccent,
     accent,
+    cycleAccent,
     activeCellId: hasActivePath ? state.activeCellId : null,
     currentPathIndex: hasActivePath ? state.currentPathIndex : 0,
     ticksInsideCurrentCell: hasActivePath ? state.ticksInsideCurrentCell : 0,

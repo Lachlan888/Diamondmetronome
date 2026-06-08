@@ -1,17 +1,28 @@
 # Sound Assets
 
-The app expects these files before audio playback is implemented:
+Current Cajon sample pack:
 
 ```text
-stomp.wav
-subdivision.wav
-accent.wav
+cajon/stomp.wav
+cajon/subdivision.wav
+cajon/accent.wav
+cajon/cycle-accent.wav
 ```
 
-Recommended sources:
+Mapping:
 
-- `stomp.wav` = foot stomp or low body thump
-- `subdivision.wav` = finger click or light tap
-- `accent.wav` = clap or chest tap
+- `cajon/stomp.wav` = cajon thump, grouped body pulse
+- `cajon/subdivision.wav` = cajon snare, counted beat grid
+- `cajon/accent.wav` = cajon rimshot, diamond cell entry
+- `cajon/cycle-accent.wav` = cajon thud, full path cycle start
+
+Future Body Percussion sample pack:
+
+```text
+body/stomp.wav
+body/subdivision.wav
+body/accent.wav
+body/cycle-accent.wav
+```
 
 Use short, tightly trimmed mono WAV files.

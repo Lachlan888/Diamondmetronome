@@ -31,17 +31,28 @@ Accent:
 - Plays when the cursor enters a new cell.
 - Replaces subdivision only when accent is enabled.
 
+Cycle accent:
+
+- Full-pattern home sound.
+- Plays when the cursor enters the first path cell at the start of the active path cycle.
+- Replaces ordinary accent and subdivision only when cycle accent is enabled.
+- If cycle accent is disabled, ordinary accent behavior still applies on the first path cell.
+
 ## Sound Priority
 
 On each beat:
 
-1. If an accent event occurs and accent sound is enabled, play accent.
-2. Else, if subdivision sound is enabled, play subdivision.
-3. If a stomp event occurs and stomp sound is enabled, also play stomp.
+1. If a cycle accent event occurs and cycle accent sound is enabled, play cycle accent.
+2. Else, if an accent event occurs and accent sound is enabled, play accent.
+3. Else, if subdivision sound is enabled, play subdivision.
+4. If a stomp event occurs and stomp sound is enabled, also play stomp.
 
 Important rules:
 
 - Stomp is additive.
+- Cycle accent is substitutive.
+- Cycle accent replaces ordinary accent and subdivision only when cycle accent is enabled.
+- If cycle accent is disabled, accent or subdivision fallback works normally on the first path cell.
 - Accent is substitutive.
 - Accent replaces subdivision only when accent is enabled.
 - If accent is disabled, subdivision plays normally on accent beats when subdivision is enabled.
@@ -138,7 +149,7 @@ export type CellId =
   | 'lowerRight'
   | 'bottom';
 
-export type SoundLayer = 'stomp' | 'subdivision' | 'accent';
+export type SoundLayer = 'stomp' | 'subdivision' | 'accent' | 'cycleAccent';
 
 export type DiamondCells = Record<CellId, number>;
 
@@ -169,6 +180,7 @@ export type TickEvents = {
   stomp: boolean;
   subdivision: boolean;
   accent: boolean;
+  cycleAccent: boolean;
   activeCellId: CellId | null;
   currentPathIndex: number;
   ticksInsideCurrentCell: number;
@@ -213,6 +225,7 @@ Engine rules:
 - Stomp interval controls stomp grouping only, not subdivision speed or diamond movement speed.
 - Stomp occurs when `globalTick % stompInterval === 0`.
 - Accent occurs when `ticksInsideCurrentCell === 0`.
+- Cycle accent occurs when `currentPathIndex === 0`, `ticksInsideCurrentCell === 0` and `activeCellId` is not null.
 - Subdivision event is true when no accent event occurs.
 - Subdivision event is false on accent event ticks.
 - Cell value controls how many beats the cursor remains in the active cell.
@@ -221,7 +234,7 @@ Engine rules:
 - One-cell paths must work.
 - If a path contains repeated cells, those cells must retrigger the accent when re-entered.
 - Empty paths must be handled safely.
-- Pattern, path, cell value, BPM, stomp interval and sound setting changes should apply live during playback. Stop and transport Reset are the only controls intended to stop playback.
+- Pattern, path, cell value, BPM, stomp interval and sound setting changes should apply live during playback. Pause stops playback while preserving the current cycle position. Stop stops playback and returns the rhythm cycle to the beginning. Global reset stops playback and restores app defaults without deleting the saved local pattern.
 
 ## Audio Timing Requirement
 

@@ -5,13 +5,19 @@ import { DebugPanel } from './DebugPanel'
 import { CycleLengthPanel } from './CycleLengthPanel'
 import { PathEditor } from './PathEditor'
 import { PatternControls } from './PatternControls'
+import { RhythmLanes } from './RhythmLanes'
 import { SoundControls } from './SoundControls'
-import { SubdivisionIndicator } from './SubdivisionIndicator'
 import { TimingControls } from './TimingControls'
 import { TransportControls } from './TransportControls'
 import { createInitialPlaybackState, getCurrentCellValue, getTickEvents } from '../lib/rhythm/engine'
 import { createRhythmScheduler, type RhythmScheduler, type ScheduledTick } from '../lib/audio/scheduler'
 import { createTestToneEngine, type TestToneEngine } from '../lib/audio/testToneEngine'
+import {
+  getSoundModeDefinition,
+  loadSavedSoundMode,
+  saveSoundMode,
+  type SoundMode,
+} from '../lib/audio/soundModes'
 import {
   createPatternFromDiamondPair,
   diamondPairsUpToFifteen,
@@ -26,10 +32,14 @@ import { clearSavedPattern, hasSavedPattern, loadSavedPattern, savePattern } fro
 
 const EMPTY_PATH_MESSAGE = 'Add at least one cell to the path.'
 const AUDIO_PLACEHOLDER_MESSAGE =
-  'Temporary oscillator test sounds are active. Replace with body-percussion sample loading in the Web Audio scheduling pass.'
+  'Cajon samples and oscillator tones are available. Body Percussion mode falls back until its sample pack is added.'
 
 function restartForPattern(pattern: DiamondPattern): PlaybackState {
   return createInitialPlaybackState(pattern)
+}
+
+function getInitialSoundMode(): SoundMode {
+  return loadSavedSoundMode() ?? 'cajon'
 }
 
 export function AppShell() {
@@ -38,6 +48,11 @@ export function AppShell() {
   const visualTimeoutIdsRef = useRef<number[]>([])
   const [pattern, setPattern] = useState<DiamondPattern>(defaultPattern)
   const [settings, setSettings] = useState<RhythmSettings>(defaultSettings)
+  const [selectedSoundMode, setSelectedSoundMode] = useState<SoundMode>(() => getInitialSoundMode())
+  const [soundModeStatus, setSoundModeStatus] = useState<string>(() => {
+    const initialSoundMode = getInitialSoundMode()
+    return `Sound mode: ${getSoundModeDefinition(initialSoundMode).name}`
+  })
   const [selectedCellId, setSelectedCellId] = useState<CellId>('centre')
   const [selectedPairId, setSelectedPairId] = useState<string>(diamondPairsUpToFifteen[0]?.id ?? '')
   const [playbackState, setPlaybackState] = useState<PlaybackState>(() =>
@@ -47,6 +62,7 @@ export function AppShell() {
     getTickEvents(defaultPattern, defaultSettings, createInitialPlaybackState(defaultPattern)),
   )
   const [patternMessage, setPatternMessage] = useState<string>('One local pattern can be saved.')
+  const [beatPulse, setBeatPulse] = useState({ id: 0, isStomp: false })
 
   const activeCellValue = getCurrentCellValue(pattern, playbackState)
   const pathIsValid = isValidPath(pattern.path)
@@ -74,6 +90,10 @@ export function AppShell() {
     const timeoutId = window.setTimeout(() => {
       setPlaybackState(tickPlaybackState)
       setLastTickEvents(tickEvents)
+      setBeatPulse((currentPulse) => ({
+        id: currentPulse.id + 1,
+        isStomp: tickEvents.stomp,
+      }))
       visualTimeoutIdsRef.current = visualTimeoutIdsRef.current.filter(
         (pendingTimeoutId) => pendingTimeoutId !== timeoutId,
       )
@@ -87,13 +107,35 @@ export function AppShell() {
   }, [settings])
 
   useEffect(() => {
+    saveSoundMode(selectedSoundMode)
+    const toneEngine = testToneEngineRef.current
+
+    if (toneEngine === null) {
+      setSoundModeStatus(`Sound mode: ${getSoundModeDefinition(selectedSoundMode).name}`)
+      return
+    }
+
+    let isCancelled = false
+
+    toneEngine.setSoundMode(selectedSoundMode).then((status) => {
+      if (!isCancelled) {
+        setSoundModeStatus(status.message)
+      }
+    })
+
+    return () => {
+      isCancelled = true
+    }
+  }, [selectedSoundMode])
+
+  useEffect(() => {
     return () => {
       schedulerRef.current?.stop()
       clearPendingVisualTimeouts()
     }
   }, [])
 
-  function stopPlayback() {
+  function pausePlayback() {
     const stoppedState = schedulerRef.current?.stop()
     clearPendingVisualTimeouts()
 
@@ -103,16 +145,16 @@ export function AppShell() {
     }))
   }
 
-  function resetPlayback(nextPattern = pattern) {
+  function resetPlayback(nextPattern = pattern, nextSettings = settings) {
     const initialState = schedulerRef.current?.reset(nextPattern) ?? restartForPattern(nextPattern)
     clearPendingVisualTimeouts()
     setPlaybackState(initialState)
-    setLastTickEvents(getTickEvents(nextPattern, settings, initialState))
+    setLastTickEvents(getTickEvents(nextPattern, nextSettings, initialState))
   }
 
   async function handlePlay() {
     if (!pathIsValid) {
-      stopPlayback()
+      pausePlayback()
       return
     }
 
@@ -122,6 +164,8 @@ export function AppShell() {
       }
 
       await testToneEngineRef.current.resume()
+      const nextSoundModeStatus = await testToneEngineRef.current.setSoundMode(selectedSoundMode)
+      setSoundModeStatus(nextSoundModeStatus.message)
 
       if (schedulerRef.current === null) {
         schedulerRef.current = createRhythmScheduler({
@@ -149,11 +193,11 @@ export function AppShell() {
     }))
   }
 
-  function handleStop() {
-    stopPlayback()
+  function handlePause() {
+    pausePlayback()
   }
 
-  function handleReset() {
+  function handleStop() {
     resetPlayback()
   }
 
@@ -253,6 +297,10 @@ export function AppShell() {
     }))
   }
 
+  function handleSoundModeChange(nextSoundMode: SoundMode) {
+    setSelectedSoundMode(nextSoundMode)
+  }
+
   function applyPattern(nextPattern: DiamondPattern, message: string) {
     updatePattern(nextPattern)
     setSelectedCellId(nextPattern.path[0] ?? 'centre')
@@ -287,9 +335,14 @@ export function AppShell() {
     applyPattern(savedPattern, 'Saved pattern loaded.')
   }
 
-  function handleResetDefault() {
+  function handleGlobalReset() {
+    schedulerRef.current?.updateSettings(defaultSettings)
     setSettings(defaultSettings)
-    applyPattern(defaultPattern, 'Default pattern restored.')
+    setSelectedSoundMode('cajon')
+    setPattern(defaultPattern)
+    setSelectedCellId(defaultPattern.path[0] ?? 'centre')
+    resetPlayback(defaultPattern, defaultSettings)
+    setPatternMessage('App reset to defaults.')
   }
 
   function handleLoadDiamond() {
@@ -335,8 +388,8 @@ export function AppShell() {
               isPlaying={playbackState.isPlaying}
               pathIsValid={pathIsValid}
               onPlay={handlePlay}
+              onPause={handlePause}
               onStop={handleStop}
-              onReset={handleReset}
             />
           </div>
 
@@ -371,38 +424,55 @@ export function AppShell() {
               <div className="diamond-caption">
                 <p>{pattern.name}</p>
               </div>
-              <DiamondGrid
-                cells={pattern.cells}
-                path={pattern.path}
-                activeCellId={playbackState.activeCellId}
-                selectedCellId={selectedCellId}
-                onCellClick={handleCellClick}
-              />
-              <div className="pulse-status">
-                <p className="active-cell-text" aria-live="polite">
-                  Active cell: {playbackState.activeCellId ?? 'none'}
-                  {activeCellValue !== null ? `, value ${activeCellValue}` : ''}
-                </p>
-                <SubdivisionIndicator
-                  globalTick={playbackState.globalTick}
-                  stompInterval={settings.stompInterval}
-                  stompActive={lastTickEvents.stomp}
+              <div
+                className="diamond-pulse-shell"
+                data-pulse-phase={beatPulse.id % 2}
+                data-stomp-pulse={beatPulse.isStomp}
+              >
+                <DiamondGrid
+                  cells={pattern.cells}
+                  path={pattern.path}
+                  activeCellId={playbackState.activeCellId}
+                  selectedCellId={selectedCellId}
+                  onCellClick={handleCellClick}
                 />
               </div>
+              <CycleLengthPanel pattern={pattern} />
+              <RhythmLanes
+                pattern={pattern}
+                settings={settings}
+                playbackState={playbackState}
+                activeCellValue={activeCellValue}
+                beatPulseId={beatPulse.id}
+                isStompPulse={beatPulse.isStomp}
+              />
             </div>
-
-            <CycleLengthPanel pattern={pattern} />
           </div>
         </section>
+
+        <aside className="panel sound-panel" aria-label="Sound controls">
+          <SoundControls
+            settings={settings}
+            soundMode={selectedSoundMode}
+            soundModeStatus={soundModeStatus}
+            onSoundModeChange={handleSoundModeChange}
+            onToggle={handleSoundToggle}
+            onVolumeChange={handleSoundVolumeChange}
+          />
+          <div className="audio-note">
+            <h2>Audio</h2>
+            <p>{AUDIO_PLACEHOLDER_MESSAGE}</p>
+          </div>
+        </aside>
       </section>
 
-      <section className="support-area" aria-label="Editing and sound controls">
+      <section className="support-area" aria-label="Pattern library and saving">
         <div className="panel pattern-panel" aria-label="Pattern library and saving">
           <PatternControls
             message={patternMessage}
             onSave={handleSaveCurrent}
             onLoad={handleLoadSaved}
-            onResetDefault={handleResetDefault}
+            onGlobalReset={handleGlobalReset}
           />
 
           <DiamondLibraryControls
@@ -412,18 +482,6 @@ export function AppShell() {
             onLoadInverse={handleLoadInverse}
             onRandomDiamond={handleRandomDiamond}
           />
-        </div>
-
-        <div className="panel sound-panel" aria-label="Sound controls">
-          <SoundControls
-            settings={settings}
-            onToggle={handleSoundToggle}
-            onVolumeChange={handleSoundVolumeChange}
-          />
-          <div className="audio-note">
-            <h2>Audio</h2>
-            <p>{AUDIO_PLACEHOLDER_MESSAGE}</p>
-          </div>
         </div>
       </section>
 

@@ -10,13 +10,14 @@ Previous working title: Rhythm Diamond Metronome.
 
 Diamond Metronome is an independent browser-based rhythm practice tool inspired by diamond-based rhythmic thinking and body-percussion pedagogy.
 
-The app combines three synchronized layers:
+The app combines four synchronized sound layers:
 
 - A grounded body-pulse sound, like a foot stomp.
 - A constant subdivision sound, like a light finger click or hi-hat equivalent.
 - An accent sound that moves through a visual diamond grid.
+- A cycle accent sound that marks the start of the full path cycle.
 
-The user hears the underlying groove, hears the subdivision grid, and watches the accent travel through a diamond-shaped number pattern.
+The user hears the underlying groove, hears the subdivision grid, hears the cycle start, and watches the accent travel through a diamond-shaped number pattern.
 
 ## Purpose
 
@@ -35,9 +36,10 @@ Provide a lightweight, local-first rhythm practice tool that helps musicians, st
 - Editable cell values
 - Default diamond pattern
 - Custom path creation by clicking cells
-- Start, stop and reset controls
+- Play, pause and stop transport controls
+- Global reset control outside the transport
 - BPM and stomp interval controls
-- Stomp, subdivision and accent sound layers
+- Stomp, subdivision, accent and cycle accent sound layers
 - Independent audio toggles for each sound layer
 - Volume controls for each sound layer
 - Active cell visual highlighting

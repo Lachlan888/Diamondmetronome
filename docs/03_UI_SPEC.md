@@ -7,7 +7,7 @@ Diamond Metronome should open directly into the practice tool, not a marketing l
 The UI must show:
 
 - Title
-- Play, Stop and Reset controls
+- Play, Pause and Stop transport controls
 - BPM control
 - Stomp interval control with options 1 through 9
 - 9-cell diamond grid
@@ -17,12 +17,14 @@ The UI must show:
 - Current path order available to assistive technology
 - Undo path step
 - Clear path
-- Sound toggles for stomp, subdivision and accent
-- Volume controls for stomp, subdivision and accent
+- Sound toggles for stomp, subdivision, accent and cycle accent
+- Volume controls for stomp, subdivision, accent and cycle accent
+- Sound mode selector with Cajon, Oscillator and Body Percussion options
 - Save current
 - Load saved
-- Reset default
+- Global reset outside the transport controls
 - Beat grouping indicator
+- Linear rhythm pulse lanes for stomp, active path values and cycle
 - Debug panel during development
 
 ## Diamond Grid
@@ -39,14 +41,15 @@ Active and selected states must not rely on color alone. Use shape, outline, mov
 
 ## Transport And Timing Controls
 
-- Play starts playback when the path is valid.
-- Stop stops playback cleanly.
-- Transport Reset stops playback and returns playback state to the start of the current pattern.
+- Play starts playback when the path is valid, or resumes from the current playback position after Pause.
+- Pause stops playback cleanly and preserves the current playback position.
+- Stop stops playback cleanly and returns playback state to the start of the current pattern.
+- Global reset sits outside transport, stops playback and restores the default pattern, settings and sound mode without deleting the saved local pattern.
 - BPM may change live during playback and controls the beat rate.
 - BPM input and slider should allow 30 through 480 without applying any hidden tempo multiplier.
 - Sound toggles and sound volumes may change live during playback.
-- Stomp interval, cell value, path edits, undo, clear, saved/default/library/random pattern changes and sound controls should apply live without stopping playback.
-- Stop and transport Reset are the only controls that should stop playback.
+- Stomp interval, cell value, path edits, undo, clear, saved/library/random pattern changes and sound controls should apply live without stopping playback.
+- Pause, Stop and Global reset are the controls that should stop playback.
 - If the path is cleared during playback, keep the beat/stomp/subdivision pulse stable if possible, show `Add at least one cell to the path.`, and suppress diamond accents until a path exists again.
 
 ## Cell Clicking
@@ -70,9 +73,9 @@ Active and selected states must not rely on color alone. Use shape, outline, mov
 ## Cycle Length Panel
 
 - Show cycle length as the sum of active path cell values, measured and shown as beats.
-- Show common even groupings as `group beats x count`, such as `2 beats x 12`.
+- Show common even groupings compactly, such as `2 × 12`.
 - Empty paths should show that there is no active path.
-- On desktop, place the panel to the right of the main diamond; on mobile, stack it below.
+- Place the compact panel beneath the main diamond.
 
 ## Selected Cell Editor
 
@@ -82,13 +85,47 @@ Active and selected states must not rely on color alone. Use shape, outline, mov
 
 ## Sound Controls
 
+Sound controls should sit next to the main diamond on desktop and stack below it on smaller screens.
+
+Sound controls should include a tactile segmented sound mode selector. Supported modes:
+
+- Cajon
+- Oscillator
+- Body Percussion
+
+Changing sound mode changes only the sound source. It must not change timing, rhythm state, path, cell values, cycle length or visual movement, and it must not stop playback.
+
 Each sound layer needs:
 
 - Labelled toggle
 - Labelled volume control
-- Clear role: stomp, subdivision or accent
+- Clear role: stomp, subdivision, accent or cycle accent
 
 The audio toggles affect only sound output. They must not stop or pause visual movement.
+
+Cycle accent marks the start of the full active path cycle. It must be independently toggleable and have its own volume control.
+
+Use styled on/off switches instead of default browser checkboxes. Use warm, analogue-feeling volume sliders instead of default blue browser sliders.
+
+## Rhythm Lanes
+
+The rhythm status under the diamond should be visual first. Circular rhythm rings have been replaced by left-to-right rhythm lanes. Show horizontal lanes for:
+
+- Stomp position inside the stomp group.
+- Diamond value lanes generated from distinct cell values in the active path.
+- Full cycle position, where the lane length equals the active path cycle length.
+
+Do not show a separate Beat lane. The beat is the shared base unit for all lanes.
+
+Do not use a single mutating Accent lane. Each visible value lane has a stable span matching its value, such as `2-beat` or `7-beat`; the value lane matching the active cell value becomes active while other value lanes remain faint guides.
+
+Use a compact colour key generated from the actual visible lanes instead of a visible status text block. The key order should be Stomp, visible value lanes sorted by number, then Cycle. Keep concise screen-reader-only text for stomp, current cell and cycle progress.
+
+Lanes follow scheduler-driven playback state and must not drive timing. The visualiser may use `requestAnimationFrame` interpolation between scheduler-delivered beat states for smoother left-to-right motion, but it remains UI-only. Long cycle lanes may cap rendered beat markers, such as at 64, to avoid making the UI unusable.
+
+The left edge is the start position. Stomp resets to the left on its grouping restart, the active value lane resets to the left when entering a new cell, and Cycle returns to the left only when the full active path cycle restarts.
+
+The main diamond area and rhythm-lane section may pulse subtly on scheduled beats. This pulse is visual only, follows scheduled rhythm events, does not drive audio timing, and should respect `prefers-reduced-motion`.
 
 ## Beat Grouping Indicator And Debug Panel
 

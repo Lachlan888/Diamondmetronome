@@ -9,7 +9,7 @@ export type CellId =
   | 'lowerRight'
   | 'bottom'
 
-export type SoundLayer = 'stomp' | 'subdivision' | 'accent'
+export type SoundLayer = 'stomp' | 'subdivision' | 'accent' | 'cycleAccent'
 
 export type DiamondCells = Record<CellId, number>
 
@@ -40,6 +40,7 @@ export type TickEvents = {
   stomp: boolean
   subdivision: boolean
   accent: boolean
+  cycleAccent: boolean
   activeCellId: CellId | null
   currentPathIndex: number
   ticksInsideCurrentCell: number

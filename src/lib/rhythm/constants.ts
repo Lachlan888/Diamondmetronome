@@ -20,4 +20,4 @@ export const CELL_IDS: CellId[] = [
   'bottom',
 ]
 
-export const SOUND_LAYERS: SoundLayer[] = ['stomp', 'subdivision', 'accent']
+export const SOUND_LAYERS: SoundLayer[] = ['stomp', 'subdivision', 'accent', 'cycleAccent']

@@ -2,10 +2,10 @@ type PatternControlsProps = {
   message: string
   onSave: () => void
   onLoad: () => void
-  onResetDefault: () => void
+  onGlobalReset: () => void
 }
 
-export function PatternControls({ message, onSave, onLoad, onResetDefault }: PatternControlsProps) {
+export function PatternControls({ message, onSave, onLoad, onGlobalReset }: PatternControlsProps) {
   return (
     <section className="control-group" aria-label="Pattern controls">
       <h2>Pattern</h2>
@@ -16,8 +16,8 @@ export function PatternControls({ message, onSave, onLoad, onResetDefault }: Pat
         <button type="button" onClick={onLoad}>
           Load saved
         </button>
-        <button type="button" onClick={onResetDefault}>
-          Reset default
+        <button type="button" onClick={onGlobalReset}>
+          Global reset
         </button>
       </div>
       <p className="message" aria-live="polite">

@@ -2,7 +2,7 @@
 
 Diamond Metronome is a local-first Vite + React + TypeScript rhythm practice app.
 
-It is an independent browser-based tool for exploring diamond-shaped rhythm patterns, editable cell values, custom paths, a counted beat grid, body-pulse grouping and accent movement.
+It is an independent browser-based tool for exploring diamond-shaped rhythm patterns, editable cell values, custom paths, a counted beat grid, body-pulse grouping, accent movement and cycle-start accents.
 
 ## Current Status
 
@@ -13,18 +13,22 @@ Implemented:
 - Unique-cell custom path editing.
 - BPM input and slider, 30 through 480.
 - Stomp every 1 through 9 beat grouping.
+- Play, Pause and Stop transport with Stop returning the cycle to the start.
 - Web Audio lookahead scheduler.
-- Temporary oscillator test sounds for stomp, subdivision and accent.
+- Temporary oscillator test sounds for stomp, subdivision, accent and cycle accent.
+- Cajon sample mode using `public/sounds/cajon`.
+- Segmented sound mode selector with Cajon, Oscillator and Body Percussion.
 - Sound toggles and volume controls.
 - Live BPM, stomp interval, cell value, path and pattern changes during playback.
-- Local one-pattern save/load/reset with `localStorage`.
+- Local one-pattern save/load with `localStorage`.
+- Global reset that restores app defaults without deleting the saved local pattern.
 - Diamond pair library up to 15, inverse loading and true random diamond generation.
-- Cycle length and even grouping panel.
+- Compact cycle length panel and linear rhythm pulse lanes with a dynamic colour key.
 - Development debug panel.
 
 Not yet implemented:
 
-- WAV/body-percussion sample loading.
+- Body Percussion sample pack.
 - Cycle Finder implementation.
 - Multiple saved patterns.
 - Import/export.

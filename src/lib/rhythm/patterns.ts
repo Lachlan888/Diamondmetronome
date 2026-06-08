@@ -34,10 +34,12 @@ export const defaultSettings: RhythmSettings = {
     stomp: true,
     subdivision: true,
     accent: true,
+    cycleAccent: true,
   },
   soundVolumes: {
     stomp: 0.8,
     subdivision: 0.45,
     accent: 0.75,
+    cycleAccent: 0.8,
   },
 }
