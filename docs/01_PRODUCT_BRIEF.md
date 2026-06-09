@@ -44,7 +44,6 @@ Provide a lightweight, local-first rhythm practice tool that helps musicians, st
 - Volume controls for each sound layer
 - Active cell visual highlighting
 - Current path display
-- Local saving of at least one custom pattern
 - Complete selectable diamond pair library up to 15
 - True random diamond generation
 - Simple, skinnable, natural hand-drawn UI direction

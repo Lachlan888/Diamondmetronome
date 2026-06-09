@@ -9,8 +9,8 @@ Diamond Metronome is a local-first Vite, React and TypeScript MVP. This document
 - [01_PRODUCT_BRIEF.md](01_PRODUCT_BRIEF.md) - product purpose, MVP scope, users, out-of-scope features and attribution boundary.
 - [02_RHYTHM_MODEL.md](02_RHYTHM_MODEL.md) - timing model, sound priority, default diamond, path behavior and rhythm engine rules.
 - [03_UI_SPEC.md](03_UI_SPEC.md) - required screen layout, controls, interaction rules and accessibility basics.
-- [04_TECH_SPEC_LOCAL_VITE.md](04_TECH_SPEC_LOCAL_VITE.md) - local Vite architecture, recommended folders, pure engine boundary, Web Audio direction and local persistence.
-- [05_ACCEPTANCE_CRITERIA.md](05_ACCEPTANCE_CRITERIA.md) - checks for product, rhythm, audio, visual, interaction, persistence, accessibility and build readiness.
+- [04_TECH_SPEC_LOCAL_VITE.md](04_TECH_SPEC_LOCAL_VITE.md) - local Vite architecture, recommended folders, pure engine boundary, Web Audio direction and browser-storage boundaries.
+- [05_ACCEPTANCE_CRITERIA.md](05_ACCEPTANCE_CRITERIA.md) - checks for product, rhythm, audio, visual, interaction, library, accessibility and build readiness.
 - [06_IMPLEMENTATION_PLAN.md](06_IMPLEMENTATION_PLAN.md) - small local-first build phases and verification expectations.
 - [07_CODEX_WORKFLOW.md](07_CODEX_WORKFLOW.md) - required workflow for future Codex sessions.
 - [08_SOUND_ASSET_GUIDE.md](08_SOUND_ASSET_GUIDE.md) - expected sound files, recording requirements and sound role guidance.

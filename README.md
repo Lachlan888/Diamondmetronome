@@ -20,9 +20,8 @@ Implemented:
 - Segmented sound mode selector with Cajon, Oscillator and Body Percussion.
 - Sound toggles and volume controls.
 - Live BPM, stomp interval, cell value, path and pattern changes during playback.
-- Local one-pattern save/load with `localStorage`.
-- Global reset that restores app defaults without deleting the saved local pattern.
-- Diamond pair library up to 15, inverse loading and true random diamond generation.
+- Global reset that restores app defaults.
+- Visual Diamond Map for ordered 1-9 pair selection, inverse loading and true random diamond generation.
 - Compact cycle length panel and linear rhythm pulse lanes with a dynamic colour key.
 - Development debug panel.
 
@@ -30,7 +29,6 @@ Not yet implemented:
 
 - Body Percussion sample pack.
 - Cycle Finder implementation.
-- Multiple saved patterns.
 - Import/export.
 - Deployment.
 - Backend or cloud features.

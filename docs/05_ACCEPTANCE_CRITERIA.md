@@ -69,14 +69,12 @@ The MVP is acceptable when the following checks pass.
 - Play resumes from Pause where practical.
 - Pause stops playback while preserving position.
 - Stop stops playback and returns the rhythm cycle to the beginning.
-- Global reset exists outside transport and restores app defaults without deleting the saved local pattern.
+- Global reset exists outside transport and restores app defaults.
 - Sound toggles and volumes can change live during playback.
 - Empty paths do not play diamond accents and do not crash playback.
 
-## Persistence And Library
+## Library And Randomiser
 
-- User can save and reload at least one pattern locally.
-- Invalid saved data does not crash the app.
 - User can choose from the complete ordered diamond pair library up to 15.
 - User can load a diamond pair and its inverse.
 - Loaded diamonds remain editable.

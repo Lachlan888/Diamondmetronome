@@ -16,7 +16,7 @@ This is the compact orientation for future implementation work.
 
 ## Product Boundary
 
-MVP includes a fixed 9-cell editable diamond, custom paths, BPM, stomp interval, stomp/subdivision/accent/cycle accent sound layers, toggles, volumes, active highlighting, local saving, complete pair library up to 15, true randomiser and a skinnable hand-drawn UI direction.
+MVP includes a fixed 9-cell editable diamond, custom paths, BPM, stomp interval, stomp/subdivision/accent/cycle accent sound layers, toggles, volumes, active highlighting, a visual 1-9 Diamond Map, true randomiser and a skinnable hand-drawn UI direction.
 
 Current sound modes are Cajon, Oscillator and Body Percussion. Cajon uses `public/sounds/cajon/*.wav`; Oscillator is a valid generated test mode; Body Percussion is a future sample pack and may fall back to Oscillator when files are missing.
 
@@ -44,12 +44,16 @@ MVP excludes Supabase, database, auth, cloud saving, API routes, server actions,
 - Cycle length is the active path cell-value sum, measured and shown as beats.
 - Empty paths must not crash.
 - Mini path diamond displays the active path from initial load.
-- Play starts or resumes playback. Pause stops playback while preserving the current cycle position. Stop stops playback and returns the rhythm cycle to the beginning. Global reset stops playback and restores app defaults without deleting the saved local pattern. BPM, stomp interval, cell values, path edits, saved/library/random pattern changes and sound settings apply live.
+- Play starts or resumes playback. Pause stops playback while preserving the current cycle position. Stop stops playback and returns the rhythm cycle to the beginning. Global reset stops playback and restores app defaults. BPM, stomp interval, cell values, path edits, Diamond Map/random pattern changes and sound settings apply live.
 - If a path becomes empty during playback, pulse-only playback continues with no diamond accent until a path is added again.
 
 ## UI Layout Notes
 
 Desktop layout should keep transport, timing and path editing on the left, the main diamond in the centre, and compact sound controls on the right. Cycle length and the rhythm pulse display sit beneath the main diamond. Sound mode should use an integrated segmented selector, and sound toggles should use styled on/off switches instead of default browser checkboxes.
+
+Diamond Library UI is a visual Diamond Map rather than a dropdown. It shows ordered 1-9 number pairs in a 9 x 9 grid, excludes same-number diagonal cells, marks the selected pair, lightly annotates the inverse, and keeps Random diamond visually separate as a true generator.
+
+Diamond Map Load selected, Load inverse and Random diamond stop playback cleanly and reset the newly applied pattern to its start.
 
 Rhythm lanes are display-only visuals. They do not drive timing. Circular rings were replaced by left-to-right lanes. The model is Stomp, one or more diamond value lanes, and Cycle. Stomp shows progress through the current stomp grouping and uses `settings.stompInterval` as its lane length. Value lanes are generated from distinct cell values in the active path; the lane matching the active cell value becomes active while other value lanes stay faint. Cycle shows progress through the full active path cycle. Visible lane status text is replaced by a compact colour key generated from the actual visible lanes, with screen-reader-only status retained.
 
@@ -70,11 +74,10 @@ Recommended implementation order:
 5. Temporary visual simulation.
 6. Temporary oscillator audio and Web Audio scheduler.
 7. Visual sync.
-8. Local storage.
-9. Diamond library and randomiser.
-10. Skinning and accessibility.
+8. Diamond library and randomiser.
+9. Skinning and accessibility.
 
-Important modules include `src/lib/rhythm/engine.ts`, `src/lib/rhythm/validation.ts`, `src/lib/rhythm/diamondLibrary.ts`, `src/lib/rhythm/randomDiamond.ts`, `src/lib/audio/scheduler.ts`, `src/lib/audio/testToneEngine.ts` and `src/lib/storage/localPatterns.ts`.
+Important modules include `src/lib/rhythm/engine.ts`, `src/lib/rhythm/validation.ts`, `src/lib/rhythm/diamondLibrary.ts`, `src/lib/rhythm/randomDiamond.ts`, `src/lib/audio/scheduler.ts` and `src/lib/audio/testToneEngine.ts`.
 
 Audio mode modules include `src/lib/audio/soundModes.ts` and `src/lib/audio/sampleLoader.ts`.
 

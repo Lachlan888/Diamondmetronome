@@ -9,7 +9,6 @@ Diamond Metronome is an existing local-first Vite, React and TypeScript app. Kee
 - TypeScript
 - CSS, or Tailwind only if already present
 - Web Audio API later
-- `localStorage` later
 - GitHub
 - Local development first
 
@@ -35,8 +34,6 @@ src/
       audioBuffers.ts
       scheduler.ts
       soundPriority.ts
-    storage/
-      patternsStorage.ts
   components/
     DiamondGrid.tsx
     TransportControls.tsx
@@ -96,7 +93,9 @@ Real WAV body-percussion sample loading is not implemented yet.
 
 ## Persistence
 
-Use `localStorage` for local saving and loading of one custom pattern in the MVP. Invalid saved data must be validated before use and must not crash the app.
+Pattern save/load is not part of the current MVP scope. Pattern exploration happens through the Diamond Map, Load selected, Load inverse, Random diamond and direct manual editing.
+
+Unrelated local preferences, such as sound mode, may use browser storage if already implemented.
 
 No backend service is part of the MVP.
 

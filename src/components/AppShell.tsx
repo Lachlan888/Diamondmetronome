@@ -28,7 +28,6 @@ import { defaultPattern, defaultSettings } from '../lib/rhythm/patterns'
 import { defaultRandomDiamondOptions, generateRandomDiamond } from '../lib/rhythm/randomDiamond'
 import type { CellId, DiamondPattern, PlaybackState, RhythmSettings, SoundLayer, TickEvents } from '../lib/rhythm/types'
 import { clampBpm, clampCellValue, isValidPath } from '../lib/rhythm/validation'
-import { clearSavedPattern, hasSavedPattern, loadSavedPattern, savePattern } from '../lib/storage/localPatterns'
 
 const EMPTY_PATH_MESSAGE = 'Add at least one cell to the path.'
 const AUDIO_PLACEHOLDER_MESSAGE =
@@ -61,7 +60,7 @@ export function AppShell() {
   const [lastTickEvents, setLastTickEvents] = useState<TickEvents>(() =>
     getTickEvents(defaultPattern, defaultSettings, createInitialPlaybackState(defaultPattern)),
   )
-  const [patternMessage, setPatternMessage] = useState<string>('One local pattern can be saved.')
+  const [patternMessage, setPatternMessage] = useState<string>('Choose a diamond or edit the current pattern.')
   const [beatPulse, setBeatPulse] = useState({ id: 0, isStomp: false })
 
   const activeCellValue = getCurrentCellValue(pattern, playbackState)
@@ -301,38 +300,11 @@ export function AppShell() {
     setSelectedSoundMode(nextSoundMode)
   }
 
-  function applyPattern(nextPattern: DiamondPattern, message: string) {
-    updatePattern(nextPattern)
+  function applyPatternFromDiamondMap(nextPattern: DiamondPattern, message: string) {
+    setPattern(nextPattern)
     setSelectedCellId(nextPattern.path[0] ?? 'centre')
+    resetPlayback(nextPattern)
     setPatternMessage(message)
-  }
-
-  function handleSaveCurrent() {
-    if (!isValidPath(pattern.path)) {
-      setPatternMessage(EMPTY_PATH_MESSAGE)
-      return
-    }
-
-    savePattern(pattern)
-    setPatternMessage('Pattern saved locally.')
-  }
-
-  function handleLoadSaved() {
-    if (!hasSavedPattern()) {
-      setPatternMessage('No saved pattern found.')
-      return
-    }
-
-    const savedPattern = loadSavedPattern()
-
-    if (savedPattern === null) {
-      clearSavedPattern()
-      setSettings(defaultSettings)
-      applyPattern(defaultPattern, 'Saved pattern was invalid, so the default pattern was kept.')
-      return
-    }
-
-    applyPattern(savedPattern, 'Saved pattern loaded.')
   }
 
   function handleGlobalReset() {
@@ -354,7 +326,7 @@ export function AppShell() {
     }
 
     const nextPattern = createPatternFromDiamondPair(selectedPair)
-    applyPattern(nextPattern, `Loaded ${selectedPair.name}.`)
+    applyPatternFromDiamondMap(nextPattern, `Loaded ${selectedPair.name}.`)
   }
 
   function handleLoadInverse() {
@@ -367,12 +339,12 @@ export function AppShell() {
 
     setSelectedPairId(inversePair.id)
     const nextPattern = createPatternFromDiamondPair(inversePair)
-    applyPattern(nextPattern, `Loaded inverse: ${inversePair.name}.`)
+    applyPatternFromDiamondMap(nextPattern, `Loaded inverse: ${inversePair.name}.`)
   }
 
   function handleRandomDiamond() {
     const randomPattern = generateRandomDiamond(defaultRandomDiamondOptions)
-    applyPattern(randomPattern, `Generated ${randomPattern.name}.`)
+    applyPatternFromDiamondMap(randomPattern, `Generated ${randomPattern.name}.`)
   }
 
   return (
@@ -466,12 +438,10 @@ export function AppShell() {
         </aside>
       </section>
 
-      <section className="support-area" aria-label="Pattern library and saving">
-        <div className="panel pattern-panel" aria-label="Pattern library and saving">
+      <section className="support-area" aria-label="Diamond selection workshop">
+        <div className="panel pattern-panel" aria-label="Diamond selection workshop">
           <PatternControls
             message={patternMessage}
-            onSave={handleSaveCurrent}
-            onLoad={handleLoadSaved}
             onGlobalReset={handleGlobalReset}
           />
 

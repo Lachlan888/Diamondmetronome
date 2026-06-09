@@ -24,7 +24,7 @@ Do not convert the app to Next.js.
 - Keep the rhythm engine pure TypeScript.
 - Use temporary visual timers only for pre-audio debugging.
 - Use Web Audio scheduling for final audio playback.
-- Validate saved/imported data before using it.
+- Validate user-entered or imported data before using it.
 - Stop playback cleanly before mutating path, cell values, stomp interval, loaded library diamonds or random diamonds.
 
 ## After Making Changes

@@ -16,13 +16,12 @@ Build locally first. Keep changes small, verifiable and scoped.
 10. Live settings and pattern updates during playback.
 11. Visual sync to scheduled audio.
 12. Interaction rules during playback.
-13. `localStorage` save, load and reset.
-14. Diamond library and true randomiser.
-15. Visual skinning and design pass.
-16. Accessibility pass.
-17. Rhythm engine tests.
-18. Final local MVP audit.
-19. Deployment preparation later.
+13. Diamond library and true randomiser.
+14. Visual skinning and design pass.
+15. Accessibility pass.
+16. Rhythm engine tests.
+17. Final local MVP audit.
+18. Deployment preparation later.
 
 For now, do not deploy and do not add Vercel configuration.
 
@@ -31,12 +30,11 @@ For now, do not deploy and do not add Vercel configuration.
 Each phase should leave the app in a working state.
 
 - Add types before behavior.
-- Add validation before accepting saved or user-entered data.
+- Add validation before accepting user-entered data.
 - Keep the rhythm engine pure and testable.
 - Build the UI around engine outputs instead of duplicating rhythm logic in components.
 - Use Web Audio scheduling for playback timing.
 - Keep temporary oscillator sounds until WAV body-percussion sample loading is explicitly requested.
-- Add persistence only after pattern validation exists.
 - Add the diamond library and randomiser as data/logic modules, not hard-coded UI behavior.
 
 ## Testing Expectations

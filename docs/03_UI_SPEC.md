@@ -20,9 +20,8 @@ The UI must show:
 - Sound toggles for stomp, subdivision, accent and cycle accent
 - Volume controls for stomp, subdivision, accent and cycle accent
 - Sound mode selector with Cajon, Oscillator and Body Percussion options
-- Save current
-- Load saved
 - Global reset outside the transport controls
+- Visual Diamond Map for ordered 1-9 pair selection
 - Beat grouping indicator
 - Linear rhythm pulse lanes for stomp, active path values and cycle
 - Debug panel during development
@@ -44,11 +43,11 @@ Active and selected states must not rely on color alone. Use shape, outline, mov
 - Play starts playback when the path is valid, or resumes from the current playback position after Pause.
 - Pause stops playback cleanly and preserves the current playback position.
 - Stop stops playback cleanly and returns playback state to the start of the current pattern.
-- Global reset sits outside transport, stops playback and restores the default pattern, settings and sound mode without deleting the saved local pattern.
+- Global reset sits outside transport, stops playback and restores the default pattern, settings and sound mode.
 - BPM may change live during playback and controls the beat rate.
 - BPM input and slider should allow 30 through 480 without applying any hidden tempo multiplier.
 - Sound toggles and sound volumes may change live during playback.
-- Stomp interval, cell value, path edits, undo, clear, saved/library/random pattern changes and sound controls should apply live without stopping playback.
+- Stomp interval, cell value, path edits, undo, clear, Diamond Map/random pattern changes and sound controls should apply live without stopping playback.
 - Pause, Stop and Global reset are the controls that should stop playback.
 - If the path is cleared during playback, keep the beat/stomp/subdivision pulse stable if possible, show `Add at least one cell to the path.`, and suppress diamond accents until a path exists again.
 
@@ -106,6 +105,14 @@ The audio toggles affect only sound output. They must not stop or pause visual m
 Cycle accent marks the start of the full active path cycle. It must be independently toggleable and have its own volume control.
 
 Use styled on/off switches instead of default browser checkboxes. Use warm, analogue-feeling volume sliders instead of default blue browser sliders.
+
+## Diamond Map
+
+The Diamond Library should use a compact visual map rather than a generic dropdown. Show ordered pairs from 1 to 9 in a 9 x 9 notebook-style grid, with rows as the first number and columns as the second number. Diagonal same-number cells are muted or blank.
+
+The selected pair should be visibly circled or marked, and its inverse should be lightly annotated. A compact summary should show the selected diamond and inverse diamond, with actions for Load selected, Load inverse and a visually separate Random diamond button. Random diamond remains a true generator, not a preset picker.
+
+Loading a selected or inverse Diamond Map pair, or generating a random diamond, should stop playback cleanly and return the new pattern to its start.
 
 ## Rhythm Lanes
 

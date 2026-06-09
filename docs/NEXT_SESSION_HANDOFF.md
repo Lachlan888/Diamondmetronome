@@ -23,9 +23,8 @@ The app opens directly into the practice tool. The main diamond shows numeric ce
 - Live cell value, path and pattern changes during playback.
 - Pulse-only playback when a path becomes empty during playback.
 - Styled sound layer switches and volumes.
-- Local one-pattern save/load.
 - Global reset for app defaults.
-- Diamond library up to 15.
+- Visual Diamond Map for ordered 1-9 pair selection.
 - Inverse loading.
 - True random diamond generation using all nine cells exactly once.
 - Compact cycle length panel beneath the diamond.
@@ -51,7 +50,7 @@ The app opens directly into the practice tool. The main diamond shows numeric ce
 - The left edge of each rhythm lane is the start point.
 - Rhythm lanes are display-only and use requestAnimationFrame-smoothed left-to-right playheads plus a dynamic compact colour key.
 - Main diamond and rhythm-lane panel pulse subtly on scheduled beats; stomp beats are slightly stronger.
-- Play starts or resumes. Pause stops playback while preserving position. Stop stops playback and returns the rhythm cycle to the beginning. Global reset stops playback and restores app defaults without deleting the saved local pattern.
+- Play starts or resumes. Pause stops playback while preserving position. Stop stops playback and returns the rhythm cycle to the beginning. Global reset stops playback and restores app defaults.
 
 ## Known Issues And Manual Checks
 
@@ -61,8 +60,8 @@ The app opens directly into the practice tool. The main diamond shows numeric ce
 - Empty path during playback should keep stomp/subdivision pulse and suppress accents.
 - Clearing an empty path still blocks starting playback from Stop state.
 - Test high BPM values manually, especially 300-480.
-- Check that loading saved/library/random patterns during playback does not stop the beat clock.
-- Check that Global reset stops playback and restores defaults without deleting the saved local pattern.
+- Check that loading Diamond Map/random patterns during playback stops playback cleanly and returns the new pattern to its start.
+- Check that Global reset stops playback and restores defaults.
 - Check that switching sound modes during playback does not stop the beat clock.
 
 ## Next Recommended Prompts
@@ -85,12 +84,12 @@ The app opens directly into the practice tool. The main diamond shows numeric ce
 - Empty path shows `Add at least one cell to the path.`
 - Empty path plays no diamond accents.
 - Adding a cell after empty path resumes accents without pressing Play again.
-- Load saved, Load diamond, Load inverse and Random diamond apply live.
+- Diamond Map Load selected, Load inverse and Random diamond stop playback cleanly and return the new pattern to its start.
 - Pause stops playback without returning to the start.
 - Stop stops playback and returns to the start.
 - Global reset restores app defaults.
 - Rhythm lanes show only the visual lanes and compact colour key, with lane status available to screen readers.
-- Save/load still works.
+- Diamond Map selected pair and inverse highlighting should remain keyboard accessible.
 - `npm run build` passes.
 - `npm run lint` passes.
 
@@ -105,7 +104,6 @@ The app opens directly into the practice tool. The main diamond shows numeric ce
 - `src/lib/rhythm/randomDiamond.ts`
 - `src/lib/audio/scheduler.ts`
 - `src/lib/audio/testToneEngine.ts`
-- `src/lib/storage/localPatterns.ts`
 - `docs/02_RHYTHM_MODEL.md`
 - `docs/03_UI_SPEC.md`
 - `docs/09_ENGINEERING_HANDOFF.md`

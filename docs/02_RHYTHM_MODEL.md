@@ -196,7 +196,7 @@ export type TickEvents = {
 - Stomp interval must be a whole number from 1 to 9 and controls only how many beats occur between stomps.
 - Volumes must be between 0 and 1.
 - Sound toggles must be booleans.
-- Invalid saved or imported data must not crash the app.
+- Invalid user-entered or imported data must not crash the app.
 
 Required user-facing messages:
 
@@ -234,7 +234,7 @@ Engine rules:
 - One-cell paths must work.
 - If a path contains repeated cells, those cells must retrigger the accent when re-entered.
 - Empty paths must be handled safely.
-- Pattern, path, cell value, BPM, stomp interval and sound setting changes should apply live during playback. Pause stops playback while preserving the current cycle position. Stop stops playback and returns the rhythm cycle to the beginning. Global reset stops playback and restores app defaults without deleting the saved local pattern.
+- Pattern, path, cell value, BPM, stomp interval and sound setting changes should apply live during playback. Pause stops playback while preserving the current cycle position. Stop stops playback and returns the rhythm cycle to the beginning. Global reset stops playback and restores app defaults.
 
 ## Audio Timing Requirement
 
