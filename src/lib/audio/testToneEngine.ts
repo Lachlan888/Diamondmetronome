@@ -56,6 +56,7 @@ export type TestToneEngine = {
   setSoundMode: (soundMode: SoundMode) => Promise<SoundModeStatus>
   getSoundModeStatus: () => SoundModeStatus
   scheduleTick: (events: TickEvents, settings: RhythmSettings, scheduledTime: number) => void
+  scheduleCutAccent: (settings: RhythmSettings, scheduledTime: number, volumeMultiplier?: number) => void
 }
 
 export function createTestToneEngine(): TestToneEngine {
@@ -187,6 +188,21 @@ export function createTestToneEngine(): TestToneEngine {
       if (events.stomp && settings.soundToggles.stomp) {
         scheduleLayer('stomp', settings, scheduledTime)
       }
+    },
+    scheduleCutAccent: (settings, scheduledTime, volumeMultiplier = 0.62) => {
+      if (!settings.soundToggles.accent) {
+        return
+      }
+
+      const reducedAccentSettings = {
+        ...settings,
+        soundVolumes: {
+          ...settings.soundVolumes,
+          accent: settings.soundVolumes.accent * volumeMultiplier,
+        },
+      }
+
+      scheduleLayer('accent', reducedAccentSettings, scheduledTime)
     },
   }
 }

@@ -16,7 +16,7 @@ This is the compact orientation for future implementation work.
 
 ## Product Boundary
 
-MVP includes a fixed 9-cell editable diamond, custom paths, BPM, stomp interval, stomp/subdivision/accent/cycle accent sound layers, toggles, volumes, active highlighting, a visual 1-9 Diamond Map, true randomiser and a skinnable hand-drawn UI direction.
+MVP includes a fixed 9-cell editable diamond, custom paths, BPM, stomp interval, stomp/subdivision/accent/cycle accent sound layers, toggles, volumes, active highlighting, a visual 1-15 Diamond Map, true randomiser and a skinnable hand-drawn UI direction.
 
 Current sound modes are Cajon, Oscillator and Body Percussion. Cajon uses `public/sounds/cajon/*.wav`; Oscillator is a valid generated test mode; Body Percussion is a future sample pack and may fall back to Oscillator when files are missing.
 
@@ -51,7 +51,7 @@ MVP excludes Supabase, database, auth, cloud saving, API routes, server actions,
 
 Desktop layout should keep transport, timing and path editing on the left, the main diamond in the centre, and compact sound controls on the right. Cycle length and the rhythm pulse display sit beneath the main diamond. Sound mode should use an integrated segmented selector, and sound toggles should use styled on/off switches instead of default browser checkboxes.
 
-Diamond Library UI is a visual Diamond Map rather than a dropdown. It shows ordered 1-9 number pairs in a 9 x 9 grid, excludes same-number diagonal cells, marks the selected pair, lightly annotates the inverse, and keeps Random diamond visually separate as a true generator.
+Diamond Library UI is a visual Diamond Map rather than a dropdown. It shows ordered 1-15 number pairs in a 15 x 15 grid, excludes same-number diagonal cells, marks the selected pair, lightly annotates the inverse, and keeps Random diamond visually separate as a true generator.
 
 Diamond Map Load selected, Load inverse and Random diamond stop playback cleanly and reset the newly applied pattern to its start.
 

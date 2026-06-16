@@ -21,7 +21,7 @@ Implemented:
 - Sound toggles and volume controls.
 - Live BPM, stomp interval, cell value, path and pattern changes during playback.
 - Global reset that restores app defaults.
-- Visual Diamond Map for ordered 1-9 pair selection, inverse loading and true random diamond generation.
+- Visual Diamond Map for ordered 1-15 pair selection, inverse loading and true random diamond generation.
 - Compact cycle length panel and linear rhythm pulse lanes with a dynamic colour key.
 - Development debug panel.
 

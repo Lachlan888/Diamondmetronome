@@ -21,7 +21,7 @@ The UI must show:
 - Volume controls for stomp, subdivision, accent and cycle accent
 - Sound mode selector with Cajon, Oscillator and Body Percussion options
 - Global reset outside the transport controls
-- Visual Diamond Map for ordered 1-9 pair selection
+- Visual Diamond Map for ordered 1-15 pair selection
 - Beat grouping indicator
 - Linear rhythm pulse lanes for stomp, active path values and cycle
 - Debug panel during development
@@ -108,7 +108,7 @@ Use styled on/off switches instead of default browser checkboxes. Use warm, anal
 
 ## Diamond Map
 
-The Diamond Library should use a compact visual map rather than a generic dropdown. Show ordered pairs from 1 to 9 in a 9 x 9 notebook-style grid, with rows as the first number and columns as the second number. Diagonal same-number cells are muted or blank.
+The Diamond Library should use a compact visual map rather than a generic dropdown. Show ordered pairs from 1 to 15 in a 15 x 15 notebook-style grid, with rows as the first number and columns as the second number. Diagonal same-number cells are muted or blank.
 
 The selected pair should be visibly circled or marked, and its inverse should be lightly annotated. A compact summary should show the selected diamond and inverse diamond, with actions for Load selected, Load inverse and a visually separate Random diamond button. Random diamond remains a true generator, not a preset picker.
 

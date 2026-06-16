@@ -1,8 +1,10 @@
 import type { CellId } from '../lib/rhythm/types'
+import type { CellData } from '../lib/rhythm/types'
+import { getCellCut, getCellValue } from '../lib/rhythm/cells'
 
 type DiamondCellProps = {
   cellId: CellId
-  value: number
+  value: CellData
   isActive: boolean
   isSelected: boolean
   pathPosition: number | null
@@ -19,6 +21,8 @@ export function DiamondCell({
   pathCount,
   onClick,
 }: DiamondCellProps) {
+  const cellValue = getCellValue(value) ?? 0
+  const cut = getCellCut(value)
   const stateLabel = [
     isActive ? 'active' : null,
     isSelected ? 'selected' : null,
@@ -35,12 +39,14 @@ export function DiamondCell({
       className="diamond-cell"
       data-active={isActive}
       data-selected={isSelected}
+      data-cut={cut !== null}
       onClick={() => onClick(cellId)}
       aria-pressed={isSelected}
-      aria-label={`${cellId} cell, value ${value}${stateLabel ? `, ${stateLabel}` : ''}`}
+      aria-label={`${cellId} cell, value ${cellValue}${cut ? `, cut ${cellValue * 2}` : ''}${stateLabel ? `, ${stateLabel}` : ''}`}
     >
       <span className="cell-content">
-        <span className="cell-value">{value}</span>
+        <span className="cell-value">{cellValue}</span>
+        {cut && <span className="cut-badge">×2</span>}
       </span>
     </button>
   )

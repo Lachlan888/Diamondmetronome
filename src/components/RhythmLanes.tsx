@@ -1,13 +1,14 @@
-import { useEffect, useMemo, useRef, type CSSProperties } from 'react'
+import { useMemo, type CSSProperties } from 'react'
+import { getCellValue } from '../lib/rhythm/cells'
 import { getCycleLength } from '../lib/rhythm/cycleLength'
-import type { DiamondPattern, PlaybackState, RhythmSettings } from '../lib/rhythm/types'
+import type { PlaybackState, PlayablePattern, RhythmSettings } from '../lib/rhythm/types'
 
 const MAX_LANE_MARKERS = 64
 const MAX_VALUE_LANES = 4
 const valueLaneColors = ['#c07a2c', '#8c6f3f', '#b45d54', '#5f7a76']
 
 type RhythmLanesProps = {
-  pattern: DiamondPattern
+  pattern: PlayablePattern
   settings: RhythmSettings
   playbackState: PlaybackState
   activeCellValue: number | null
@@ -21,6 +22,7 @@ type LaneDefinition = {
   length: number
   position: number
   markerCount: number
+  activeMarkerIndex: number | null
   color: string
   kind: 'stomp' | 'value' | 'cycle'
   isActive: boolean
@@ -31,18 +33,21 @@ function positiveModulo(value: number, modulo: number) {
   return ((value % modulo) + modulo) % modulo
 }
 
-function getPathValueCounts(pattern: DiamondPattern) {
+function getPathValueCounts(pattern: PlayablePattern) {
   const valueCounts = new Map<number, number>()
 
   pattern.path.forEach((cellId) => {
-    const value = pattern.cells[cellId]
+    const value = getCellValue(pattern.cells[cellId])
+    if (value === null) {
+      return
+    }
     valueCounts.set(value, (valueCounts.get(value) ?? 0) + 1)
   })
 
   return valueCounts
 }
 
-function getVisibleValueLanes(pattern: DiamondPattern, activeCellValue: number | null) {
+function getVisibleValueLanes(pattern: PlayablePattern, activeCellValue: number | null) {
   const valueCounts = getPathValueCounts(pattern)
   const allValues = Array.from(valueCounts.keys()).sort((left, right) => left - right)
 
@@ -73,25 +78,26 @@ function getVisibleValueLanes(pattern: DiamondPattern, activeCellValue: number |
   return Array.from(selectedValues).sort((left, right) => left - right)
 }
 
-function getMarkerPercent(position: number, length: number) {
-  return (positiveModulo(position, Math.max(1, length)) / Math.max(1, length)) * 100
+function getActiveMarkerIndex(position: number, length: number, markerCount: number) {
+  const safeLength = Math.max(1, length)
+  const safeMarkerCount = Math.min(Math.max(1, markerCount), MAX_LANE_MARKERS)
+  const normalizedPosition = positiveModulo(position, safeLength)
+
+  return Math.min(safeMarkerCount - 1, Math.floor((normalizedPosition / safeLength) * safeMarkerCount))
 }
 
 function getMarkers(lane: LaneDefinition) {
   const markerCount = Math.min(Math.max(1, lane.markerCount), MAX_LANE_MARKERS)
 
-  return Array.from({ length: markerCount }, (_, index) => {
-    const percent = markerCount <= 1 ? 0 : (index / (markerCount - 1)) * 100
-
-    return (
-      <span
-        className="rhythm-lane-marker"
-        key={index}
-        style={{ '--marker-position': `${percent}%` } as CSSProperties}
-        aria-hidden="true"
-      />
-    )
-  })
+  return Array.from({ length: markerCount }, (_, index) => (
+    <span
+      className="rhythm-lane-marker"
+      data-active={lane.activeMarkerIndex === index}
+      data-pulse={lane.isPulsing && lane.activeMarkerIndex === index}
+      key={index}
+      aria-hidden="true"
+    />
+  ))
 }
 
 export function RhythmLanes({
@@ -102,7 +108,6 @@ export function RhythmLanes({
   beatPulseId,
   isStompPulse,
 }: RhythmLanesProps) {
-  const laneRefs = useRef(new Map<string, HTMLDivElement>())
   const cycleLength = Math.max(1, getCycleLength(pattern))
   const cyclePosition = positiveModulo(playbackState.globalTick, cycleLength)
   const stompPosition = positiveModulo(playbackState.globalTick, settings.stompInterval)
@@ -120,6 +125,7 @@ export function RhythmLanes({
         length: value,
         position: isActive ? cellPosition : 0,
         markerCount: value,
+        activeMarkerIndex: isActive ? getActiveMarkerIndex(cellPosition, value, value) : null,
         color: valueLaneColors[index % valueLaneColors.length],
         kind: 'value',
         isActive,
@@ -133,6 +139,7 @@ export function RhythmLanes({
         length: settings.stompInterval,
         position: stompPosition,
         markerCount: settings.stompInterval,
+        activeMarkerIndex: getActiveMarkerIndex(stompPosition, settings.stompInterval, settings.stompInterval),
         color: 'var(--rd-stomp)',
         kind: 'stomp',
         isActive: true,
@@ -145,6 +152,7 @@ export function RhythmLanes({
         length: cycleLength,
         position: cyclePosition,
         markerCount: cycleLength,
+        activeMarkerIndex: getActiveMarkerIndex(cyclePosition, cycleLength, cycleLength),
         color: 'var(--rd-accent)',
         kind: 'cycle',
         isActive: true,
@@ -158,58 +166,6 @@ export function RhythmLanes({
     settings.stompInterval,
     stompPosition,
     visibleValues,
-  ])
-
-  useEffect(() => {
-    const beatStartMs = performance.now()
-    const beatDurationMs = (60 / settings.bpm) * 1000
-    let animationFrameId = 0
-
-    function getProgress(lane: LaneDefinition, fractionalBeatProgress: number) {
-      if (lane.kind === 'value' && !lane.isActive) {
-        return 0
-      }
-
-      const progress = (positiveModulo(lane.position, lane.length) + fractionalBeatProgress) / lane.length
-
-      return Math.max(0, Math.min(0.999, progress))
-    }
-
-    function updateLanePositions() {
-      const elapsedMs = performance.now() - beatStartMs
-      const fractionalBeatProgress = playbackState.isPlaying
-        ? Math.max(0, Math.min(0.999, elapsedMs / beatDurationMs))
-        : 0
-
-      lanes.forEach((lane) => {
-        const laneElement = laneRefs.current.get(lane.key)
-
-        if (laneElement === undefined) {
-          return
-        }
-
-        laneElement.style.setProperty(
-          '--lane-progress',
-          `${getProgress(lane, fractionalBeatProgress) * 100}%`,
-        )
-      })
-
-      if (playbackState.isPlaying) {
-        animationFrameId = window.requestAnimationFrame(updateLanePositions)
-      }
-    }
-
-    updateLanePositions()
-
-    return () => {
-      window.cancelAnimationFrame(animationFrameId)
-    }
-  }, [
-    lanes,
-    playbackState.globalTick,
-    playbackState.isPlaying,
-    playbackState.ticksInsideCurrentCell,
-    settings.bpm,
   ])
 
   return (
@@ -227,28 +183,14 @@ export function RhythmLanes({
               data-lane-kind={lane.kind}
               data-active={lane.isActive}
               key={lane.key}
-              ref={(node) => {
-                if (node === null) {
-                  laneRefs.current.delete(lane.key)
-                } else {
-                  laneRefs.current.set(lane.key, node)
-                }
-              }}
               style={
                 {
                   '--lane-color': lane.color,
-                  '--lane-progress': `${getMarkerPercent(lane.position, lane.length)}%`,
                 } as CSSProperties
               }
             >
               <span className="rhythm-lane-label">{lane.label}</span>
-              <span className="rhythm-lane-track">
-                <span className="rhythm-lane-fill" />
-                {getMarkers(lane)}
-                {(lane.kind !== 'value' || lane.isActive) && (
-                  <span className="rhythm-lane-playhead" data-pulse={lane.isPulsing} />
-                )}
-              </span>
+              <span className="rhythm-lane-circles">{getMarkers(lane)}</span>
             </div>
           )
         })}

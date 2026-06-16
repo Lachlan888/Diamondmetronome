@@ -6,7 +6,7 @@ import { soundModes, type SoundMode } from '../lib/audio/soundModes'
 type SoundControlsProps = {
   settings: RhythmSettings
   soundMode: SoundMode
-  soundModeStatus: string
+  soundModeStatus: string | null
   onSoundModeChange: (soundMode: SoundMode) => void
   onToggle: (layer: SoundLayer, enabled: boolean) => void
   onVolumeChange: (layer: SoundLayer, volume: number) => void
@@ -46,7 +46,7 @@ export function SoundControls({
           ))}
         </div>
       </fieldset>
-      <p className="message">{soundModeStatus}</p>
+      {soundModeStatus && <p className="message warning">{soundModeStatus}</p>}
 
       <h2>Sound layers</h2>
       <div className="sound-list">

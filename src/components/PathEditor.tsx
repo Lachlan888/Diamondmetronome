@@ -99,7 +99,6 @@ export function PathEditor({
             +
           </button>
         </div>
-        <p className="message">Use a whole number from 1 to 15.</p>
       </div>
     </section>
   )

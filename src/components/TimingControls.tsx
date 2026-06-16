@@ -18,7 +18,6 @@ export function TimingControls({
       <h2>Timing</h2>
       <label className="field">
         <span>BPM</span>
-        <span className="field-help">Beat rate</span>
         <div className="bpm-control">
           <input
             type="number"
@@ -41,7 +40,6 @@ export function TimingControls({
 
       <fieldset className="segmented stomp-pad">
         <legend>Stomp every</legend>
-        <p className="field-help">Beats between stomps</p>
         <div className="segmented-options">
           {ALLOWED_STOMP_INTERVALS.map((option) => (
             <label key={option}>
@@ -57,7 +55,6 @@ export function TimingControls({
           ))}
         </div>
       </fieldset>
-      <p className="message">BPM controls the counted beat. Stomp every groups those beats into a body pulse.</p>
     </section>
   )
 }

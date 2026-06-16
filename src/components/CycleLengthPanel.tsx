@@ -3,10 +3,10 @@ import {
   getCycleLength,
   getEvenGroupings,
 } from '../lib/rhythm/cycleLength'
-import type { DiamondPattern } from '../lib/rhythm/types'
+import type { PlayablePattern } from '../lib/rhythm/types'
 
 type CycleLengthPanelProps = {
-  pattern: DiamondPattern
+  pattern: PlayablePattern
 }
 
 export function CycleLengthPanel({ pattern }: CycleLengthPanelProps) {

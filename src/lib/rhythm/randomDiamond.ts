@@ -8,6 +8,11 @@ export type RandomDiamondOptions = {
   allowReduciblePairs: boolean
 }
 
+export type RandomDiamondResult = {
+  pattern: DiamondPattern
+  pairId: string
+}
+
 export const defaultRandomDiamondOptions: RandomDiamondOptions = {
   minValue: 1,
   maxValue: 15,
@@ -78,24 +83,27 @@ function choosePath(): CellId[] {
   return shuffleCells(CELL_IDS)
 }
 
-export function generateRandomDiamond(options: RandomDiamondOptions): DiamondPattern {
+export function generateRandomDiamond(options: RandomDiamondOptions): RandomDiamondResult {
   const [numberA, numberB] = chooseNumberPair(options)
   const path = choosePath()
 
   return {
-    id: `random-diamond-${numberA}-${numberB}-${Date.now().toString(36)}-${randomInteger(1000, 9999)}`,
-    name: `Random Diamond: ${numberA}/${numberB}, full path`,
-    cells: {
-      top: numberA,
-      upperLeft: numberB,
-      upperRight: numberB,
-      middleLeft: numberB,
-      centre: numberA,
-      middleRight: numberB,
-      lowerLeft: numberB,
-      lowerRight: numberB,
-      bottom: numberA,
+    pairId: `pair-${numberA}-${numberB}`,
+    pattern: {
+      id: `random-diamond-${numberA}-${numberB}-${Date.now().toString(36)}-${randomInteger(1000, 9999)}`,
+      name: `Random Diamond: ${numberA}/${numberB}, full path`,
+      cells: {
+        top: numberA,
+        upperLeft: numberB,
+        upperRight: numberB,
+        middleLeft: numberB,
+        centre: numberA,
+        middleRight: numberB,
+        lowerLeft: numberB,
+        lowerRight: numberB,
+        bottom: numberA,
+      },
+      path,
     },
-    path,
   }
 }

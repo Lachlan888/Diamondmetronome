@@ -1,6 +1,7 @@
-import type { DiamondPattern, PlaybackState, RhythmSettings, TickEvents } from './types'
+import type { PlaybackState, PlayablePattern, RhythmSettings, TickEvents } from './types'
+import { getCellValue } from './cells'
 
-export function createInitialPlaybackState(pattern: DiamondPattern): PlaybackState {
+export function createInitialPlaybackState(pattern: PlayablePattern): PlaybackState {
   const activeCellId = pattern.path[0] ?? null
 
   return {
@@ -13,18 +14,18 @@ export function createInitialPlaybackState(pattern: DiamondPattern): PlaybackSta
 }
 
 export function getCurrentCellValue(
-  pattern: DiamondPattern,
+  pattern: PlayablePattern,
   state: PlaybackState,
 ): number | null {
   if (state.activeCellId === null) {
     return null
   }
 
-  return pattern.cells[state.activeCellId] ?? null
+  return getCellValue(pattern.cells[state.activeCellId])
 }
 
 export function getTickEvents(
-  pattern: DiamondPattern,
+  pattern: PlayablePattern,
   settings: RhythmSettings,
   state: PlaybackState,
 ): TickEvents {
@@ -45,7 +46,7 @@ export function getTickEvents(
 }
 
 export function normalizePlaybackStateForPattern(
-  pattern: DiamondPattern,
+  pattern: PlayablePattern,
   state: PlaybackState,
 ): PlaybackState {
   if (pattern.path.length === 0) {
@@ -72,7 +73,7 @@ export function normalizePlaybackStateForPattern(
 }
 
 export function advancePlaybackState(
-  pattern: DiamondPattern,
+  pattern: PlayablePattern,
   state: PlaybackState,
 ): PlaybackState {
   if (pattern.path.length === 0 || state.activeCellId === null) {

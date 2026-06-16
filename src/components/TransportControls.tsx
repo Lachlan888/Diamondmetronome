@@ -4,6 +4,7 @@ type TransportControlsProps = {
   onPlay: () => void
   onPause: () => void
   onStop: () => void
+  onReset: () => void
 }
 
 export function TransportControls({
@@ -12,10 +13,10 @@ export function TransportControls({
   onPlay,
   onPause,
   onStop,
+  onReset,
 }: TransportControlsProps) {
   return (
-    <section className="control-group" aria-label="Transport">
-      <h2>Transport</h2>
+    <section className="control-group" aria-label="Playback controls">
       <div className="button-row transport-buttons">
         <button
           type="button"
@@ -45,6 +46,9 @@ export function TransportControls({
           title="Stop"
         >
           <span aria-hidden="true">■</span>
+        </button>
+        <button type="button" className="reset-button" onClick={onReset}>
+          Reset
         </button>
       </div>
     </section>

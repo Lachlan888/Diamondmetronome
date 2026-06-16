@@ -11,13 +11,33 @@ export type CellId =
 
 export type SoundLayer = 'stomp' | 'subdivision' | 'accent' | 'cycleAccent'
 
-export type DiamondCells = Record<CellId, number>
+export type CellCutSettings = {
+  enabled: boolean
+  multiplier: 2
+  phrase: number[]
+}
+
+export type CellSettings = {
+  value: number
+  cut?: CellCutSettings
+}
+
+export type CellData = number | CellSettings
+
+export type DiamondCells = Record<CellId, CellData>
 
 export type DiamondPattern = {
   id: string
   name: string
   cells: DiamondCells
   path: CellId[]
+}
+
+export type PlayablePattern = {
+  id: string
+  name: string
+  cells: Record<string, CellData>
+  path: string[]
 }
 
 export type RhythmSettings = {
@@ -32,7 +52,7 @@ export type PlaybackState = {
   globalTick: number
   currentPathIndex: number
   ticksInsideCurrentCell: number
-  activeCellId: CellId | null
+  activeCellId: string | null
 }
 
 export type TickEvents = {
@@ -41,7 +61,7 @@ export type TickEvents = {
   subdivision: boolean
   accent: boolean
   cycleAccent: boolean
-  activeCellId: CellId | null
+  activeCellId: string | null
   currentPathIndex: number
   ticksInsideCurrentCell: number
 }

@@ -7,6 +7,7 @@ import {
   CELL_VALUE_MIN,
   SOUND_LAYERS,
 } from './constants'
+import { isValidCellData } from './cells'
 import type { CellId, DiamondCells, DiamondPattern, RhythmSettings } from './types'
 
 export function isValidCellId(value: unknown): value is CellId {
@@ -32,7 +33,7 @@ export function isValidDiamondCells(value: unknown): value is DiamondCells {
   }
 
   const cells = value as Record<string, unknown>
-  return CELL_IDS.every((cellId) => isValidCellValue(cells[cellId]))
+  return CELL_IDS.every((cellId) => isValidCellData(cells[cellId]))
 }
 
 export function isValidPattern(value: unknown): value is DiamondPattern {
