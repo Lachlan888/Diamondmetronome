@@ -2,12 +2,13 @@ import type { PlaybackState, PlayablePattern, RhythmSettings, TickEvents } from 
 import { getCellValue } from './cells'
 
 export function createInitialPlaybackState(pattern: PlayablePattern): PlaybackState {
-  const activeCellId = pattern.path[0] ?? null
+  const currentPathIndex = pattern.path.findIndex((cellId) => getCellValue(pattern.cells[cellId]) !== null)
+  const activeCellId = currentPathIndex >= 0 ? pattern.path[currentPathIndex] ?? null : null
 
   return {
     isPlaying: false,
     globalTick: 0,
-    currentPathIndex: 0,
+    currentPathIndex: currentPathIndex >= 0 ? currentPathIndex : 0,
     ticksInsideCurrentCell: 0,
     activeCellId,
   }
@@ -58,17 +59,27 @@ export function normalizePlaybackStateForPattern(
     }
   }
 
-  const currentPathIndex = Math.min(
+  const clampedPathIndex = Math.min(
     Math.max(0, state.currentPathIndex),
     pattern.path.length - 1,
   )
-  const ticksInsideCurrentCell = Math.max(0, state.ticksInsideCurrentCell)
+  const clampedActiveCellId = pattern.path[clampedPathIndex] ?? null
+  const currentPathIndex =
+    clampedActiveCellId !== null && getCellValue(pattern.cells[clampedActiveCellId]) !== null
+      ? clampedPathIndex
+      : pattern.path.findIndex((cellId) => getCellValue(pattern.cells[cellId]) !== null)
+  const activeCellId = currentPathIndex >= 0 ? pattern.path[currentPathIndex] ?? null : null
+  const activeCellValue = activeCellId === null ? null : getCellValue(pattern.cells[activeCellId])
+  const ticksInsideCurrentCell =
+    activeCellValue === null || activeCellValue <= 0
+      ? 0
+      : Math.min(Math.max(0, state.ticksInsideCurrentCell), activeCellValue - 1)
 
   return {
     ...state,
-    currentPathIndex,
+    currentPathIndex: currentPathIndex >= 0 ? currentPathIndex : 0,
     ticksInsideCurrentCell,
-    activeCellId: pattern.path[currentPathIndex] ?? null,
+    activeCellId,
   }
 }
 

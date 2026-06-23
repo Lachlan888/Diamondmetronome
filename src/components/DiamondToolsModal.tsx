@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 
 type DiamondToolsModalProps = {
   children: ReactNode
+  className?: string
   title?: string
   returnFocusRef: RefObject<HTMLElement | null>
   onClose: () => void
@@ -25,6 +26,7 @@ function getFocusableElements(container: HTMLElement): HTMLElement[] {
 
 export function DiamondToolsModal({
   children,
+  className,
   title = 'Diamond library & solver',
   returnFocusRef,
   onClose,
@@ -34,12 +36,13 @@ export function DiamondToolsModal({
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow
+    const returnFocusElement = returnFocusRef.current
     document.body.style.overflow = 'hidden'
     window.requestAnimationFrame(() => closeButtonRef.current?.focus())
 
     return () => {
       document.body.style.overflow = previousOverflow
-      returnFocusRef.current?.focus()
+      returnFocusElement?.focus()
     }
   }, [returnFocusRef])
 
@@ -87,7 +90,7 @@ export function DiamondToolsModal({
       <div
         aria-labelledby="diamond-tools-modal-title"
         aria-modal="true"
-        className="diamond-tools-modal"
+        className={className ? `diamond-tools-modal ${className}` : 'diamond-tools-modal'}
         onKeyDown={handleKeyDown}
         ref={modalRef}
         role="dialog"

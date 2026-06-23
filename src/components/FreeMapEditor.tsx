@@ -100,8 +100,12 @@ export function FreeMapEditor({
 
   useEffect(() => {
     if (activeCellCount === 1 && hasCentreSeed && pattern.outboundPath.length === 0) {
-      setZoomPercent(100)
-      setFitPan({ x: 0, y: 0 })
+      const animationFrameId = window.requestAnimationFrame(() => {
+        setZoomPercent(100)
+        setFitPan({ x: 0, y: 0 })
+      })
+
+      return () => window.cancelAnimationFrame(animationFrameId)
     }
   }, [activeCellCount, hasCentreSeed, pattern.outboundPath.length])
 
@@ -256,7 +260,7 @@ export function FreeMapEditor({
       <section className="control-group free-map-tools" aria-label="Free Map controls">
         <h2>Free Map</h2>
 
-        <fieldset className="segmented free-map-tool-switch">
+        <fieldset className="segmented chunky-selector free-map-tool-switch">
           <legend>Tool</legend>
           <div className="segmented-options">
             {(['mark', 'value', 'path'] as const).map((toolOption) => (
@@ -273,7 +277,7 @@ export function FreeMapEditor({
           </div>
         </fieldset>
 
-        <fieldset className="segmented free-map-route-switch">
+        <fieldset className="segmented chunky-selector free-map-route-switch">
           <legend>Route</legend>
           <div className="segmented-options two-options">
             {(['forward', 'thereBack'] as const).map((routeOption) => (
@@ -425,7 +429,6 @@ export function FreeMapEditor({
                   }
                 >
                   <span className="free-map-cell-value">{isActive ? activeCell.value : ''}</span>
-                  {cut && <span className="free-map-cut-badge">×2</span>}
                   {firstPathIndex >= 0 && (
                     <span className="free-map-path-badge">
                       {firstPathIndex + 1}

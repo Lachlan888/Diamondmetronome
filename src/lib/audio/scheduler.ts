@@ -10,6 +10,8 @@ import type { TestToneEngine } from './testToneEngine'
 
 export const SCHEDULER_INTERVAL_MS = 25
 export const SCHEDULE_AHEAD_SECONDS = 0.1
+const HIDDEN_SCHEDULER_INTERVAL_MS = 250
+const HIDDEN_SCHEDULE_AHEAD_SECONDS = 2.5
 
 export type ScheduledTick = {
   tickEvents: TickEvents
@@ -62,11 +64,43 @@ export function createRhythmScheduler({
   let nextTickTime = 0
   let intervalId: number | null = null
 
+  function isDocumentHidden() {
+    return typeof document !== 'undefined' && document.visibilityState === 'hidden'
+  }
+
+  function getSchedulerIntervalMs() {
+    return isDocumentHidden() ? HIDDEN_SCHEDULER_INTERVAL_MS : SCHEDULER_INTERVAL_MS
+  }
+
+  function getScheduleAheadSeconds() {
+    // Background tabs throttle JS timers, so queue a longer Web Audio window while hidden.
+    return isDocumentHidden() ? HIDDEN_SCHEDULE_AHEAD_SECONDS : SCHEDULE_AHEAD_SECONDS
+  }
+
+  function startLoop() {
+    if (intervalId !== null) {
+      window.clearInterval(intervalId)
+    }
+
+    intervalId = window.setInterval(schedulerPass, getSchedulerIntervalMs())
+  }
+
+  function handleVisibilityChange() {
+    if (intervalId === null) {
+      return
+    }
+
+    schedulerPass()
+    startLoop()
+  }
+
   function stopLoop() {
     if (intervalId !== null) {
       window.clearInterval(intervalId)
       intervalId = null
     }
+
+    document.removeEventListener('visibilitychange', handleVisibilityChange)
 
     playbackState = {
       ...playbackState,
@@ -78,7 +112,7 @@ export function createRhythmScheduler({
 
   function schedulerPass() {
     const currentTime = toneEngine.getCurrentTime()
-    const scheduleUntil = currentTime + SCHEDULE_AHEAD_SECONDS
+    const scheduleUntil = currentTime + getScheduleAheadSeconds()
 
     while (nextTickTime <= scheduleUntil) {
       const tickEvents = getTickEvents(pattern, settings, playbackState)
@@ -137,7 +171,8 @@ export function createRhythmScheduler({
       }
       nextTickTime = toneEngine.getCurrentTime()
       schedulerPass()
-      intervalId = window.setInterval(schedulerPass, SCHEDULER_INTERVAL_MS)
+      document.addEventListener('visibilitychange', handleVisibilityChange)
+      startLoop()
     },
     stop: stopLoop,
     reset: (nextPattern = pattern) => {

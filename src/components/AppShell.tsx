@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { DiamondGrid } from './DiamondGrid'
-import { DiamondLibraryControls } from './DiamondLibraryControls'
+import { DiamondLibraryControls, DiamondSolverControls } from './DiamondLibraryControls'
 import { DiamondToolsModal } from './DiamondToolsModal'
 import { CutCellsModal, type CutEditableCell } from './CutCellsModal'
 import { FreeMapEditor } from './FreeMapEditor'
@@ -28,7 +28,7 @@ import {
 import { defaultPattern, defaultSettings } from '../lib/rhythm/patterns'
 import { defaultRandomDiamondOptions, generateRandomDiamond } from '../lib/rhythm/randomDiamond'
 import { CELL_VALUE_MAX, CELL_VALUE_MIN } from '../lib/rhythm/constants'
-import { getCellCut, getCellValue, normalizeCellSettings } from '../lib/rhythm/cells'
+import { getCellCut, getCellValue, isValidCellCut, normalizeCellSettings } from '../lib/rhythm/cells'
 import {
   createBlankFreeMapPattern,
   FREE_MAP_SEED_CELL_ID,
@@ -41,6 +41,7 @@ import {
 } from '../lib/rhythm/freeMap'
 import type {
   CellCutSettings,
+  CellData,
   CellId,
   DiamondPattern,
   PlaybackState,
@@ -48,7 +49,7 @@ import type {
   RhythmSettings,
   SoundLayer,
 } from '../lib/rhythm/types'
-import { clampBpm, clampCellValue, isValidCellId } from '../lib/rhythm/validation'
+import { clampBpm, clampCellValue, isValidCellId, isValidStompInterval } from '../lib/rhythm/validation'
 
 const EMPTY_PATH_MESSAGE = 'Add at least one cell to the path.'
 const FREE_MAP_EMPTY_PATH_MESSAGE = 'Add at least one active cell to the path.'
@@ -85,10 +86,25 @@ function isEditableKeyboardTarget(target: EventTarget | null) {
   return target.closest('input, textarea, select, button, [contenteditable]:not([contenteditable="false"])') !== null
 }
 
+function updateCellValuePreservingValidCut(cell: CellData, nextValue: number): CellData {
+  const clampedValue = clampCellValue(nextValue)
+  const normalizedCell = normalizeCellSettings(cell)
+
+  if (normalizedCell.cut && isValidCellCut(normalizedCell.cut, clampedValue)) {
+    return {
+      value: clampedValue,
+      cut: normalizedCell.cut,
+    }
+  }
+
+  return clampedValue
+}
+
 export function AppShell() {
   const testToneEngineRef = useRef<TestToneEngine | null>(null)
   const schedulerRef = useRef<RhythmScheduler | null>(null)
-  const openDiamondToolsButtonRef = useRef<HTMLButtonElement | null>(null)
+  const openDiamondLibraryButtonRef = useRef<HTMLButtonElement | null>(null)
+  const openDiamondSolverButtonRef = useRef<HTMLButtonElement | null>(null)
   const openCutCellsButtonRef = useRef<HTMLButtonElement | null>(null)
   const visualTimeoutIdsRef = useRef<number[]>([])
   const cellEntryBufferRef = useRef('')
@@ -110,7 +126,8 @@ export function AppShell() {
   const [playbackState, setPlaybackState] = useState<PlaybackState>(() =>
     createInitialPlaybackState(toPlayableDiamondPattern(defaultPattern)),
   )
-  const [diamondToolsOpen, setDiamondToolsOpen] = useState(false)
+  const [diamondLibraryOpen, setDiamondLibraryOpen] = useState(false)
+  const [diamondSolverOpen, setDiamondSolverOpen] = useState(false)
   const [cutCellsOpen, setCutCellsOpen] = useState(false)
   const [beatPulse, setBeatPulse] = useState({ id: 0, isStomp: false })
 
@@ -139,13 +156,22 @@ export function AppShell() {
 
     return Object.values(freeMapPattern.cells)
       .sort((leftCell, rightCell) => leftCell.id.localeCompare(rightCell.id))
-      .map((cell) => ({
-        id: cell.id,
-        label: cell.id,
-        value: cell.value,
-        cut: getCellCut(cell),
-      }))
-  }, [appMode, freeMapPattern.cells, pattern.cells])
+      .map((cell) => {
+        const firstPathIndex = freeMapPattern.outboundPath.indexOf(cell.id)
+        const pathCount = freeMapPattern.outboundPath.filter((pathCellId) => pathCellId === cell.id).length
+
+        return {
+          id: cell.id,
+          label: cell.id,
+          value: cell.value,
+          cut: getCellCut(cell),
+          x: cell.x,
+          y: cell.y,
+          pathOrder: firstPathIndex >= 0 ? firstPathIndex + 1 : undefined,
+          pathCount,
+        }
+      })
+  }, [appMode, freeMapPattern.cells, freeMapPattern.outboundPath, pattern.cells])
 
   const currentPathText = useMemo(() => {
     if (pattern.path.length === 0) {
@@ -185,8 +211,8 @@ export function AppShell() {
   }, [settings])
 
   useEffect(() => {
-    diamondToolsOpenRef.current = diamondToolsOpen
-  }, [diamondToolsOpen])
+    diamondToolsOpenRef.current = diamondLibraryOpen || diamondSolverOpen || cutCellsOpen
+  }, [cutCellsOpen, diamondLibraryOpen, diamondSolverOpen])
 
   useEffect(() => {
     appModeRef.current = appMode
@@ -423,7 +449,7 @@ export function AppShell() {
       ...pattern,
       cells: {
         ...pattern.cells,
-        [selectedCellId]: clampCellValue(nextValue),
+        [selectedCellId]: updateCellValuePreservingValidCut(pattern.cells[selectedCellId], nextValue),
       },
     })
   }
@@ -447,6 +473,10 @@ export function AppShell() {
   }
 
   function handleStompIntervalChange(nextStompInterval: number) {
+    if (!isValidStompInterval(nextStompInterval)) {
+      return
+    }
+
     setSettings((currentSettings) => ({
       ...currentSettings,
       stompInterval: nextStompInterval,
@@ -607,7 +637,10 @@ export function AppShell() {
         [selectedCell.id]: {
           ...selectedCell,
           value: clampCellValue(nextValue),
-          cut: undefined,
+          cut:
+            selectedCell.cut && isValidCellCut(selectedCell.cut, clampCellValue(nextValue))
+              ? selectedCell.cut
+              : undefined,
         },
       },
     })
@@ -735,15 +768,35 @@ export function AppShell() {
   }
 
   function handleGlobalReset() {
+    const blankFreeMapPattern = createBlankFreeMapPattern()
+
     schedulerRef.current?.updateSettings(defaultSettings)
     setSettings(defaultSettings)
     setSelectedSoundMode('cajon')
     setPattern(defaultPattern)
     setSelectedCellId(defaultPattern.path[0] ?? 'centre')
-    setFreeMapPattern(createBlankFreeMapPattern())
+    setFreeMapPattern(blankFreeMapPattern)
     setFreeMapTool('mark')
     setFreeMapMessage(null)
-    resetPlayback(appMode === 'diamond' ? toPlayableDiamondPattern(defaultPattern) : toPlayableFreeMapPattern(createBlankFreeMapPattern()))
+    resetPlayback(appMode === 'diamond' ? toPlayableDiamondPattern(defaultPattern) : toPlayableFreeMapPattern(blankFreeMapPattern))
+  }
+
+  function openDiamondLibrary() {
+    setDiamondSolverOpen(false)
+    setCutCellsOpen(false)
+    setDiamondLibraryOpen(true)
+  }
+
+  function openDiamondSolver() {
+    setDiamondLibraryOpen(false)
+    setCutCellsOpen(false)
+    setDiamondSolverOpen(true)
+  }
+
+  function openCutCells() {
+    setDiamondLibraryOpen(false)
+    setDiamondSolverOpen(false)
+    setCutCellsOpen(true)
   }
 
   function loadDiamondPair(numerator: number, denominator: number) {
@@ -785,7 +838,7 @@ export function AppShell() {
             <h1>Diamond Metronome</h1>
           </header>
 
-          <fieldset className="segmented mode-switch" aria-label="Mode">
+          <fieldset className="segmented chunky-selector mode-switch" aria-label="Mode">
             <legend className="visually-hidden">Mode</legend>
             <div className="segmented-options two-options">
               <label>
@@ -946,10 +999,18 @@ export function AppShell() {
                   <button
                     type="button"
                     className="diamond-action"
-                    onClick={() => setDiamondToolsOpen(true)}
-                    ref={openDiamondToolsButtonRef}
+                    onClick={openDiamondLibrary}
+                    ref={openDiamondLibraryButtonRef}
                   >
-                    Open library &amp; solver
+                    Open library
+                  </button>
+                  <button
+                    type="button"
+                    className="diamond-action"
+                    onClick={openDiamondSolver}
+                    ref={openDiamondSolverButtonRef}
+                  >
+                    Open solver
                   </button>
                   <button type="button" className="diamond-action random-action" onClick={handleRandomDiamond}>
                     Random diamond
@@ -957,7 +1018,7 @@ export function AppShell() {
                   <button
                     type="button"
                     className="diamond-action cut-action"
-                    onClick={() => setCutCellsOpen(true)}
+                    onClick={openCutCells}
                     ref={openCutCellsButtonRef}
                   >
                     Cut cells
@@ -969,9 +1030,28 @@ export function AppShell() {
         </main>
       </div>
 
-      {diamondToolsOpen && (
-        <DiamondToolsModal returnFocusRef={openDiamondToolsButtonRef} onClose={() => setDiamondToolsOpen(false)}>
+      {diamondLibraryOpen && (
+        <DiamondToolsModal
+          className="diamond-library-modal"
+          title="Diamond library"
+          returnFocusRef={openDiamondLibraryButtonRef}
+          onClose={() => setDiamondLibraryOpen(false)}
+        >
           <DiamondLibraryControls
+            selectedPairId={selectedPairId}
+            onPairLoad={loadDiamondPair}
+          />
+        </DiamondToolsModal>
+      )}
+
+      {diamondSolverOpen && (
+        <DiamondToolsModal
+          className="diamond-solver-modal"
+          title="Diamond solver"
+          returnFocusRef={openDiamondSolverButtonRef}
+          onClose={() => setDiamondSolverOpen(false)}
+        >
+          <DiamondSolverControls
             selectedPairId={selectedPairId}
             onPairLoad={loadDiamondPair}
           />
@@ -980,6 +1060,7 @@ export function AppShell() {
 
       {cutCellsOpen && (
         <DiamondToolsModal
+          className="cut-cells-modal"
           title="Cut cells"
           returnFocusRef={openCutCellsButtonRef}
           onClose={() => setCutCellsOpen(false)}

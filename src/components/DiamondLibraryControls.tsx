@@ -111,13 +111,12 @@ function getDivisibilityStyle(divisibility: DiamondDivisibility | undefined): CS
   } as CSSProperties
 }
 
-export function DiamondLibraryControls({
+export function DiamondSolverControls({
   selectedPairId,
   onPairLoad,
 }: DiamondLibraryControlsProps) {
   const [solverInputs, setSolverInputs] = useState<SolverInputs>(initialSolverInputs)
   const selectedPair = getDiamondPairById(selectedPairId)
-  const pairValues = Array.from({ length: DIAMOND_PAIR_MAX }, (_, index) => index + 1)
   const beatsPerBar = parsePositiveWholeNumber(solverInputs.beatsPerBar)
   const solverResult = useMemo(
     () =>
@@ -148,13 +147,8 @@ export function DiamondLibraryControls({
   }
 
   return (
-    <section className="control-group" aria-label="Diamond library controls">
-      <div className="diamond-library-workspace">
+    <section className="control-group modal-contained-content" aria-label="Diamond solver controls">
         <div className="diamond-solver" aria-label="Diamond solver">
-          <div className="diamond-solver-header">
-            <h3>Diamond solver</h3>
-          </div>
-
           <div className="solver-card solver-target-card">
             <h4>Target</h4>
             <div className="diamond-solver-fields">
@@ -265,7 +259,19 @@ export function DiamondLibraryControls({
             ) : null}
           </div>
         </div>
+    </section>
+  )
+}
 
+export function DiamondLibraryControls({
+  selectedPairId,
+  onPairLoad,
+}: DiamondLibraryControlsProps) {
+  const selectedPair = getDiamondPairById(selectedPairId)
+  const pairValues = Array.from({ length: DIAMOND_PAIR_MAX }, (_, index) => index + 1)
+
+  return (
+    <section className="control-group diamond-library-content modal-contained-content" aria-label="Diamond library controls">
         <div className="diamond-map-scroll">
           <div className="diamond-divisibility-legend" aria-label="Cycle divisibility colours">
             <span>Fits:</span>
@@ -339,7 +345,6 @@ export function DiamondLibraryControls({
             </div>
           </div>
         </div>
-      </div>
     </section>
   )
 }

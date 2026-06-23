@@ -46,7 +46,6 @@ export function DiamondCell({
     >
       <span className="cell-content">
         <span className="cell-value">{cellValue}</span>
-        {cut && <span className="cut-badge">×2</span>}
       </span>
     </button>
   )
